@@ -1,48 +1,61 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import html2canvas from "html2canvas";
 import "./App.css";
 
 function App() {
   const teams = ["CSE", "EEE", "ECE", "MECH", "MCA", "B.ARCH", "ROBOTICS", "CIVIL"];
+  const roundsPerTeam = 3;
+  const matchesPerRound = teams.length / 2; // 8 teams → 4 matches per round
+
   const [matches, setMatches] = useState([]);
   const [currentRound, setCurrentRound] = useState(0);
   const [showFinalSchedule, setShowFinalSchedule] = useState(false);
-  const roundsPerTeam = 3;
+  const scheduleRef = useRef(null); // Reference for capturing image
 
-  // Function to shuffle an array
-  const shuffleArray = (array) => {
-    return array.sort(() => Math.random() - 0.5);
-  };
+  useEffect(() => {
+    setMatches([]); // Ensure matches are empty on reload
+    setCurrentRound(0); // Reset round count
+    setShowFinalSchedule(false); // Ensure final schedule is hidden
+  }, []);
 
   const generateMatches = () => {
-    let shuffledTeams = shuffleArray([...teams]);
     let matchList = [];
-    let playedMatches = new Set();
+    let usedMatches = new Set();
+    let teamMatchCount = {}; // Tracks how many matches each team has played
 
-    // Generate 3 rounds
+    teams.forEach(team => (teamMatchCount[team] = 0));
+
     for (let round = 0; round < roundsPerTeam; round++) {
+      let availableTeams = [...teams]; // Copy team list for pairing
       let roundMatches = [];
-      let usedTeams = new Set();
 
-      for (let i = 0; i < teams.length; i += 2) {
-        let team1 = shuffledTeams[i];
-        let team2 = shuffledTeams[i + 1];
+      while (roundMatches.length < matchesPerRound) {
+        availableTeams.sort(() => Math.random() - 0.5); // Shuffle teams
 
-        // Ensure unique matchups
-        while (playedMatches.has(`${team1} vs ${team2}`) || usedTeams.has(team1) || usedTeams.has(team2)) {
-          shuffleArray(shuffledTeams);
-          team1 = shuffledTeams[i];
-          team2 = shuffledTeams[i + 1];
+        let team1 = availableTeams.pop();
+        let team2 = availableTeams.pop();
+
+        let matchKey = `${team1} vs ${team2}`;
+        let reverseMatchKey = `${team2} vs ${team1}`;
+
+        if (
+          usedMatches.has(matchKey) ||
+          usedMatches.has(reverseMatchKey) ||
+          teamMatchCount[team1] >= roundsPerTeam ||
+          teamMatchCount[team2] >= roundsPerTeam
+        ) {
+          availableTeams.push(team1, team2); // Put teams back and retry
+          continue;
         }
 
         roundMatches.push({ team1, team2 });
-        playedMatches.add(`${team1} vs ${team2}`);
-        playedMatches.add(`${team2} vs ${team1}`);
-        usedTeams.add(team1);
-        usedTeams.add(team2);
+        usedMatches.add(matchKey);
+        usedMatches.add(reverseMatchKey);
+        teamMatchCount[team1]++;
+        teamMatchCount[team2]++;
       }
 
       matchList.push(roundMatches);
-      shuffledTeams = shuffleArray([...teams]); // Reshuffle for next round
     }
 
     setMatches(matchList);
@@ -67,6 +80,17 @@ function App() {
     }
   };
 
+  const downloadScheduleAsImage = () => {
+    if (scheduleRef.current) {
+      html2canvas(scheduleRef.current).then(canvas => {
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = "match_schedule.png";
+        link.click();
+      });
+    }
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -76,7 +100,7 @@ function App() {
         ) : showFinalSchedule ? (
           <>
             <h2>Final Match Schedule</h2>
-            <div className="all-rounds">
+            <div ref={scheduleRef} className="all-rounds">
               {matches.map((roundMatches, roundIndex) => (
                 <div key={roundIndex} className="round">
                   <h3>Round {roundIndex + 1}</h3>
@@ -91,12 +115,13 @@ function App() {
               ))}
             </div>
             <button onClick={prevRound} className="back-btn">Back to Last Round</button>
+            <button onClick={downloadScheduleAsImage} className="download-btn">Download Schedule</button>
           </>
         ) : (
           <>
             <h2>Round {currentRound}</h2>
             <ul className="match-list">
-              {matches[currentRound - 1].map((match, index) => (
+              {matches[currentRound - 1]?.map((match, index) => (
                 <li key={index}>
                   {match.team1} vs {match.team2}
                 </li>
