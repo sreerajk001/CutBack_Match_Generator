@@ -94,49 +94,55 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>CUTBACK ROUND MATCHES</h1>
-        {matches.length === 0 ? (
-          <button onClick={generateMatches}>Generate Matches</button>
-        ) : showFinalSchedule ? (
-          <>
-            <h2>Final Match Schedule</h2>
-            <div ref={scheduleRef} className="all-rounds">
-              {matches.map((roundMatches, roundIndex) => (
-                <div key={roundIndex} className="round">
-                  <h3>Round {roundIndex + 1}</h3>
-                  <ul className="match-list">
-                    {roundMatches.map((match, index) => (
-                      <li key={index}>
-                        {match.team1} vs {match.team2}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-            <button onClick={prevRound} className="back-btn">Back to Last Round</button>
-            <button onClick={downloadScheduleAsImage} className="download-btn">Download Schedule</button>
-          </>
-        ) : (
-          <>
-            <h2>Round {currentRound}</h2>
+  <h1>CUTBACK ROUND MATCHES</h1>
+
+  {/* Download Button Positioned at the Top-Right */}
+  {matches.length > 0 && showFinalSchedule && (
+    <button onClick={downloadScheduleAsImage} className="download-btn">Download Schedule</button>
+  )}
+
+  {matches.length === 0 ? (
+    <button onClick={generateMatches}>Generate Matches</button>
+  ) : showFinalSchedule ? (
+    <>
+      <h2>Final Match Schedule</h2>
+      <div ref={scheduleRef} className="all-rounds">
+        {matches.map((roundMatches, roundIndex) => (
+          <div key={roundIndex} className="round">
+            <h3>Round {roundIndex + 1}</h3>
             <ul className="match-list">
-              {matches[currentRound - 1]?.map((match, index) => (
+              {roundMatches.map((match, index) => (
                 <li key={index}>
                   {match.team1} vs {match.team2}
                 </li>
               ))}
             </ul>
+          </div>
+        ))}
+      </div>
+      <button onClick={prevRound} className="back-btn">Back to Last Round</button>
+    </>
+  ) : (
+    <>
+      <h2>Round {currentRound}</h2>
+      <ul className="match-list">
+        {matches[currentRound - 1]?.map((match, index) => (
+          <li key={index}>
+            {match.team1} vs {match.team2}
+          </li>
+        ))}
+      </ul>
 
-            <div className="button-container">
-              <button onClick={prevRound} disabled={currentRound === 1}>Back</button>
-              <button onClick={nextRound}>
-                {currentRound === roundsPerTeam ? "Show Final Schedule" : "Next"}
-              </button>
-            </div>
-          </>
-        )}
-      </header>
+      <div className="button-container">
+        <button onClick={prevRound} disabled={currentRound === 1}>Back</button>
+        <button onClick={nextRound}>
+          {currentRound === roundsPerTeam ? "Show Final Schedule" : "Next"}
+        </button>
+      </div>
+    </>
+  )}
+</header>
+
     </div>
   );
 }
