@@ -79,9 +79,24 @@ function App() {
     }
   };
 
+  // const downloadScheduleAsImage = () => {
+  //   if (scheduleRef.current) {
+  //     html2canvas(scheduleRef.current).then(canvas => {
+  //       const link = document.createElement("a");
+  //       link.href = canvas.toDataURL("image/png");
+  //       link.download = "match_schedule.png";
+  //       link.click();
+  //     });
+  //   }
+  // };
+
   const downloadScheduleAsImage = () => {
     if (scheduleRef.current) {
-      html2canvas(scheduleRef.current).then(canvas => {
+      html2canvas(scheduleRef.current, {
+        scale: 2, // Higher resolution
+        useCORS: true, // Fix missing images/fonts
+        backgroundColor: "#000", // Set a white background
+      }).then((canvas) => {
         const link = document.createElement("a");
         link.href = canvas.toDataURL("image/png");
         link.download = "match_schedule.png";
@@ -89,6 +104,7 @@ function App() {
       });
     }
   };
+  
 
   return (
     <div className="App">

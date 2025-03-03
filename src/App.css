@@ -133,8 +133,16 @@ button:disabled {
   border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
+.schedule-container {
+  width: 100%;
+  min-height: 600px; /* Adjust as needed */
+  /* background: white; */
+  padding: 20px;
+}
+
+
 /* Match Card - Glass Effect */
-.match-card {
+/* .match-card { */
   /* background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -148,7 +156,7 @@ button:disabled {
   color: white;
   transition: transform 0.3s ease-in-out, background 0.3s ease-in-out;
   border: 2px solid rgba(255, 255, 255, 0.2); */
-}
+
 
 .match-card:hover {
   transform: scale(1.05);
